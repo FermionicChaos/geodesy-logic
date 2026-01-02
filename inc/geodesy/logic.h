@@ -1,0 +1,4 @@
+#ifndef GEODESY_LOGIC_H
+#define GEODESY_LOGIC_H
+
+#endif // !GEODESY_LOGIC_H
