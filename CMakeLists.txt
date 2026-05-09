@@ -76,7 +76,7 @@ set(REPO_DEPENDENCY_DIR "${CMAKE_SOURCE_DIR}/dep" CACHE PATH "Select Path to sto
 # Declare main project
 project(${REPO_NAME}-development
     VERSION ${REPO_VERSION}
-    LANGUAGES CXX
+    LANGUAGES C CXX
 )
 
 # Set Project Global Settings
@@ -147,7 +147,7 @@ if(NOT EXISTS "${LUA_SRC_DIR}/lapi.c")
     set(LUA_SRC_DIR "${lua_SOURCE_DIR}")
 endif()
 
-add_library(lua_c STATIC
+set(LUA_SOURCES
     "${LUA_SRC_DIR}/lapi.c"
     "${LUA_SRC_DIR}/lauxlib.c"
     "${LUA_SRC_DIR}/lbaselib.c"
@@ -182,14 +182,10 @@ add_library(lua_c STATIC
     "${LUA_SRC_DIR}/lzio.c"
 )
 
-add_library(lua::lua ALIAS lua_c)
-
-target_include_directories(lua_c PUBLIC "${LUA_SRC_DIR}")
-set_target_properties(lua_c PROPERTIES POSITION_INDEPENDENT_CODE ON)
+list(APPEND REPO_SRC ${LUA_SOURCES})
 
 if(UNIX AND NOT APPLE)
-    target_compile_definitions(lua_c PRIVATE LUA_USE_LINUX)
-    target_link_libraries(lua_c PRIVATE m dl)
+    list(APPEND REPO_LUA_PRIVATE_LINK_LIBS m dl)
 endif()
 
 add_library(${REPO_NAME} ${REPO_INC} ${REPO_SRC})
@@ -208,9 +204,16 @@ target_include_directories(${REPO_NAME}
         "${CMAKE_CURRENT_SOURCE_DIR}/inc"
     PRIVATE
         "${CMAKE_CURRENT_SOURCE_DIR}/src"
+        "${LUA_SRC_DIR}"
 )
 
+set_target_properties(${REPO_NAME} PROPERTIES POSITION_INDEPENDENT_CODE ON)
+
+if(UNIX AND NOT APPLE)
+    target_compile_definitions(${REPO_NAME} PRIVATE LUA_USE_LINUX)
+endif()
+
 target_link_libraries(${REPO_NAME}
-    PUBLIC
-        lua::lua
+    PRIVATE
+        ${REPO_LUA_PRIVATE_LINK_LIBS}
 )
