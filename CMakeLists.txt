@@ -217,3 +217,35 @@ target_link_libraries(${REPO_NAME}
     PRIVATE
         ${REPO_LUA_PRIVATE_LINK_LIBS}
 )
+
+# ==============================================================================
+# Unit Tests
+# ==============================================================================
+
+# Gather unit test sources
+file(GLOB_RECURSE REPO_TST CONFIGURE_DEPENDS
+    "${CMAKE_CURRENT_SOURCE_DIR}/tst/*.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/tst/*.cc"
+    "${CMAKE_CURRENT_SOURCE_DIR}/tst/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/tst/*.cxx"
+    "${CMAKE_CURRENT_SOURCE_DIR}/tst/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/tst/*.hh"
+    "${CMAKE_CURRENT_SOURCE_DIR}/tst/*.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/tst/*.hxx"
+)
+
+# Create unit test executable
+add_executable(${REPO_UNIT_TEST_NAME} ${REPO_TST})
+
+# Configure unit test include directories
+target_include_directories(${REPO_UNIT_TEST_NAME}
+    PRIVATE
+        "${CMAKE_CURRENT_SOURCE_DIR}/inc"
+        "${CMAKE_CURRENT_SOURCE_DIR}/tst"
+)
+
+# Link unit test with main library
+target_link_libraries(${REPO_UNIT_TEST_NAME}
+    PRIVATE
+        ${REPO_NAME}
+)
