@@ -71,6 +71,8 @@ file(GLOB_RECURSE REPO_SRC CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.inl"
 )
 
+# Configuration Options
+option(REPO_BUILD_UNIT_TESTS "Build ${REPO_NAME} unit tests" OFF)
 set(REPO_DEPENDENCY_DIR "${CMAKE_SOURCE_DIR}/dep" CACHE PATH "Select Path to store fetched dependency source code. Default is ${CMAKE_SOURCE_DIR}/dep/")
 
 # Declare main project
@@ -232,30 +234,37 @@ target_link_libraries(${REPO_NAME}
 # Unit Tests
 # ==============================================================================
 
-# Gather unit test sources
-file(GLOB_RECURSE REPO_TST CONFIGURE_DEPENDS
-    "${CMAKE_CURRENT_SOURCE_DIR}/tst/*.c"
-    "${CMAKE_CURRENT_SOURCE_DIR}/tst/*.cc"
-    "${CMAKE_CURRENT_SOURCE_DIR}/tst/*.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/tst/*.cxx"
-    "${CMAKE_CURRENT_SOURCE_DIR}/tst/*.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/tst/*.hh"
-    "${CMAKE_CURRENT_SOURCE_DIR}/tst/*.hpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/tst/*.hxx"
-)
+if(REPO_BUILD_UNIT_TESTS)
+    enable_testing()
 
-# Create unit test executable
-add_executable(${REPO_UNIT_TEST_NAME} ${REPO_TST})
+    # Gather unit test sources
+    file(GLOB_RECURSE REPO_TST CONFIGURE_DEPENDS
+        "${CMAKE_CURRENT_SOURCE_DIR}/tst/*.c"
+        "${CMAKE_CURRENT_SOURCE_DIR}/tst/*.cc"
+        "${CMAKE_CURRENT_SOURCE_DIR}/tst/*.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/tst/*.cxx"
+        "${CMAKE_CURRENT_SOURCE_DIR}/tst/*.h"
+        "${CMAKE_CURRENT_SOURCE_DIR}/tst/*.hh"
+        "${CMAKE_CURRENT_SOURCE_DIR}/tst/*.hpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/tst/*.hxx"
+    )
 
-# Configure unit test include directories
-target_include_directories(${REPO_UNIT_TEST_NAME}
-    PRIVATE
-        "${CMAKE_CURRENT_SOURCE_DIR}/inc"
-        "${CMAKE_CURRENT_SOURCE_DIR}/tst"
-)
+    # Create unit test executable
+    add_executable(${REPO_UNIT_TEST_NAME} ${REPO_TST})
 
-# Link unit test with main library
-target_link_libraries(${REPO_UNIT_TEST_NAME}
-    PRIVATE
-        ${REPO_NAME}
-)
+    # Configure unit test include directories
+    target_include_directories(${REPO_UNIT_TEST_NAME}
+        PRIVATE
+            "${CMAKE_CURRENT_SOURCE_DIR}/inc"
+            "${CMAKE_CURRENT_SOURCE_DIR}/tst"
+    )
+
+    # Link unit test with main library
+    target_link_libraries(${REPO_UNIT_TEST_NAME}
+        PRIVATE
+            ${REPO_NAME}
+    )
+
+    add_test(NAME ${REPO_UNIT_TEST_NAME} COMMAND $<TARGET_FILE:${REPO_UNIT_TEST_NAME}>)
+
+endif()
